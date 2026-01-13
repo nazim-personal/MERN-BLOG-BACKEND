@@ -37,8 +37,8 @@ export class CommentService {
                 content: comment.content,
                 author: comment.author,
                 post: comment.post,
-                created_at: (comment as any).created_at,
-                updated_at: (comment as any).updated_at
+                createdAt: (comment as any).createdAt,
+                updatedAt: (comment as any).updatedAt
             }
         };
     }
@@ -78,8 +78,8 @@ export class CommentService {
                 content: updatedComment.content,
                 author: updatedComment.author,
                 post: updatedComment.post,
-                created_at: (updatedComment as any).created_at,
-                updated_at: (updatedComment as any).updated_at
+                createdAt: (updatedComment as any).createdAt,
+                updatedAt: (updatedComment as any).updatedAt
             }
         };
     }
@@ -131,8 +131,8 @@ export class CommentService {
                 content: comment.content,
                 author: comment.author,
                 post: comment.post,
-                created_at: (comment as any).created_at,
-                updated_at: (comment as any).updated_at
+                createdAt: (comment as any).createdAt,
+                updatedAt: (comment as any).updatedAt
             })),
             pagination: {
                 page: payload.page || 1,

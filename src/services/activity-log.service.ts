@@ -20,10 +20,10 @@ export class ActivityLogService {
             user: data.userId as any,
             action: data.action,
             resource: data.resource,
-            resource_id: data.resourceId,
+            resourceId: data.resourceId,
             details: data.details,
-            ip_address: data.ipAddress,
-            user_agent: data.userAgent
+            ipAddress: data.ipAddress,
+            userAgent: data.userAgent
         });
     }
 

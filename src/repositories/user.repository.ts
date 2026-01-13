@@ -61,7 +61,7 @@ export class UserRepository {
         const skip = (filters.page - 1) * filters.limit;
 
         return UserModel.find(query)
-            .sort({ created_at: -1 })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(filters.limit)
             .select('-password')

@@ -20,14 +20,14 @@ export class SessionService {
             .digest('hex');
 
         const session = await this.sessionRepository.create({
-            user_id: userId,
-            refresh_token_hash: refreshTokenHash,
+            userId: userId,
+            refreshTokenHash: refreshTokenHash,
             device: {
                 ip: device.ip,
-                user_agent: device.userAgent
+                userAgent: device.userAgent
             },
-            expires_at: new Date(Date.now() + this.config.jwt.refreshTTLms),
-            is_active: true
+            expiresAt: new Date(Date.now() + this.config.jwt.refreshTTLms),
+            isActive: true
         });
 
         return { session, refreshToken };
@@ -39,7 +39,7 @@ export class SessionService {
 
     async validateSession(sessionId: string) {
         const session = await this.sessionRepository.findById(sessionId);
-        if (!session || !session.is_active) {
+        if (!session || !session.isActive) {
             return null;
         }
         return session;
@@ -53,11 +53,11 @@ export class SessionService {
 
         const session = await this.sessionRepository.findByRefreshTokenHash(refreshTokenHash);
 
-        if (!session || !session.is_active) {
+        if (!session || !session.isActive) {
             return null;
         }
 
-        if (session.expires_at < new Date()) {
+        if (session.expiresAt < new Date()) {
             await this.sessionRepository.deactivateById(session.id.toString());
             return null;
         }

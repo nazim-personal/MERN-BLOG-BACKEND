@@ -8,7 +8,7 @@ export interface User {
     metadata?: Record<string, any>;
     role?: Role;
     permissions?: string[];
-    created_at?: Date;
+    createdAt?: Date;
 }
 
 const UserSchema = new Schema({
@@ -20,7 +20,7 @@ const UserSchema = new Schema({
     permissions: { type: [String], default: [] }
 }, {
     timestamps: {
-        createdAt: 'created_at',
+        createdAt: 'createdAt',
         updatedAt: false
     },
     versionKey: false

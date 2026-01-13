@@ -55,7 +55,7 @@ export class AuthService {
                 name: user.name,
                 role: userRole,
                 permissions: effectivePermissions,
-                created_at: (user as any).created_at
+                createdAt: (user as any).createdAt
             }
         };
     }
@@ -126,7 +126,7 @@ export class AuthService {
             throw new Error('Invalid or expired refresh token');
         }
 
-        const user = await this.userRepository.findById(session.user_id as any);
+        const user = await this.userRepository.findById(session.userId as any);
         if (!user) {
             throw new Error('User not found');
         }
@@ -256,7 +256,7 @@ export class AuthService {
                 role: user.role || Role.USER,
                 permissions: RolePermissions[user.role as Role] || RolePermissions[Role.USER],
                 customPermissions: user.permissions || [],
-                created_at: (user as any).created_at
+                createdAt: (user as any).createdAt
             }))
         };
     }

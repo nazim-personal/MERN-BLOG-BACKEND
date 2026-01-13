@@ -28,14 +28,14 @@ export const authMiddleware = (
 
       if (decoded.sessionId) {
         const session = await sessionRepository.findById(decoded.sessionId);
-        if (!session || !session.is_active) {
+        if (!session || !session.isActive) {
           return res.status(401).json({
             message: 'Session is no longer active',
             success: false
           });
         }
 
-        if (session.user_id.toString() !== decoded.userId) {
+        if (session.userId.toString() !== decoded.userId) {
           return res.status(401).json({
             message: 'Session does not belong to this user',
             success: false

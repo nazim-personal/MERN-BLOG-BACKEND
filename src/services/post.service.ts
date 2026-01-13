@@ -49,8 +49,8 @@ export class PostService {
                 status: post.status,
                 tags: post.tags,
                 slug: post.slug,
-                created_at: (post as any).created_at,
-                updated_at: (post as any).updated_at
+                createdAt: (post as any).createdAt,
+                updatedAt: (post as any).updatedAt
             }
         };
     }
@@ -102,8 +102,8 @@ export class PostService {
                 status: updatedPost.status,
                 tags: updatedPost.tags,
                 slug: updatedPost.slug,
-                created_at: (updatedPost as any).created_at,
-                updated_at: (updatedPost as any).updated_at
+                createdAt: (updatedPost as any).createdAt,
+                updatedAt: (updatedPost as any).updatedAt
             }
         };
     }
@@ -188,8 +188,8 @@ export class PostService {
                 status: post.status,
                 tags: post.tags,
                 slug: post.slug,
-                created_at: (post as any).created_at,
-                updated_at: (post as any).updated_at
+                createdAt: (post as any).createdAt,
+                updatedAt: (post as any).updatedAt
             }
         };
     }
@@ -221,9 +221,9 @@ export class PostService {
                 status: post.status,
                 tags: post.tags,
                 slug: post.slug,
-                created_at: (post as any).created_at,
-                updated_at: (post as any).updated_at,
-                deleted_at: post.deleted_at
+                createdAt: (post as any).createdAt,
+                updatedAt: (post as any).updatedAt,
+                deletedAt: post.deletedAt
             })),
             pagination: {
                 page: payload.page || 1,
@@ -265,9 +265,9 @@ export class PostService {
                 status: post.status,
                 tags: post.tags,
                 slug: post.slug,
-                created_at: (post as any).created_at,
-                updated_at: (post as any).updated_at,
-                deleted_at: post.deleted_at
+                createdAt: (post as any).createdAt,
+                updatedAt: (post as any).updatedAt,
+                deletedAt: post.deletedAt
             })),
             pagination: {
                 page: payload.page || 1,

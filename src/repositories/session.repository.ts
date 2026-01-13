@@ -7,13 +7,13 @@ export class SessionRepository {
     }
 
     async findByRefreshTokenHash(hash: string): Promise<(Session & Document) | null> {
-        return await SessionModel.findOne({ refresh_token_hash: hash, is_active: true });
+        return await SessionModel.findOne({ refreshTokenHash: hash, isActive: true });
     }
 
     async findAndLock(hash: string): Promise<(Session & Document) | null> {
         return await SessionModel.findOneAndUpdate(
-            { refresh_token_hash: hash, is_active: true, concurrency_lock: null },
-            { concurrency_lock: new Date().toISOString() },
+            { refreshTokenHash: hash, isActive: true, concurrencyLock: null },
+            { concurrencyLock: new Date().toISOString() },
             { new: true }
         );
     }
@@ -21,20 +21,20 @@ export class SessionRepository {
     async updateWithRotation(sessionId: any, data: Partial<Session>): Promise<void> {
         await SessionModel.findByIdAndUpdate(new Types.ObjectId(sessionId), {
             ...data,
-            concurrency_lock: null
+            concurrencyLock: null
         });
     }
 
     async deactivateAllForUser(userId: string): Promise<void> {
-        await SessionModel.updateMany({ user_id: userId, is_active: true }, { is_active: false });
+        await SessionModel.updateMany({ userId: userId, isActive: true }, { isActive: false });
     }
 
     async deactivateByHash(hash: string): Promise<void> {
-        await SessionModel.updateOne({ refresh_token_hash: hash, is_active: true }, { is_active: false });
+        await SessionModel.updateOne({ refreshTokenHash: hash, isActive: true }, { isActive: false });
     }
 
     async deactivateById(sessionId: string): Promise<void> {
-        await SessionModel.findByIdAndUpdate(new Types.ObjectId(sessionId), { is_active: false });
+        await SessionModel.findByIdAndUpdate(new Types.ObjectId(sessionId), { isActive: false });
     }
 
     async findById(sessionId: string): Promise<(Session & Document) | null> {
