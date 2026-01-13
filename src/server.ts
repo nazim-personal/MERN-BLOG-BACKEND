@@ -1,36 +1,63 @@
+import 'reflect-metadata';
+import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
-// Load environment variables
+import mongoose from 'mongoose';
+import { AuthModule } from './index';
+import { logger } from './utils/logger';
+import { errorHandler } from './errors/error-handler';
+import { NotFoundError } from './errors/custom-errors';
+
 dotenv.config();
 
-import app from './app';
-import { connectDB } from './config/database';
+const app = express();
+const port = process.env.PORT || 3018;
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  process.exit(1);
+// CORS configuration
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(express.json());
+
+const authConfig = {
+    mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-db',
+    jwt: {
+        accessSecret: process.env.JWT_ACCESS_SECRET || 'access-secret',
+        accessTTL: process.env.JWT_ACCESS_TTL || '15m',
+        refreshSecret: process.env.JWT_REFRESH_SECRET || 'refresh-secret',
+        refreshTTLms: parseInt(process.env.JWT_REFRESH_TTL_MS || '604800000')
+    },
+    sessionSecret: process.env.SESSION_SECRET || 'session-secret'
+};
+
+const authModule = AuthModule.init(authConfig);
+app.use('/api', authModule.router);
+
+// 404 Handler
+app.use((req, res, next) => {
+    next(new NotFoundError(`Can't find ${req.originalUrl} on this server!`));
 });
 
-// Connect to Database
-connectDB();
+// Centralized Error Handler
+app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const start = async () => {
+    try {
+        logger.info('📝 Change Log initiated successfully. It can be disabled from env => REQUEST_LOG="false"');
+        logger.info('📝 Request Logging is enabled. It can be disabled from env => REQUEST_LOG="false"');
+        console.log(`Application is running on http://localhost:${port}`);
+        await mongoose.connect(authConfig.mongoUri);
+        logger.info('💾 Database connected successfully');
+        app.listen(port, () => {
+        });
+    } catch (error) {
+        logger.error(`Error starting server: ${error}`);
+        process.exit(1);
+    }
+};
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`CORS allowed origin: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err: Error | unknown) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  if (err instanceof Error) {
-    console.error(err.name, err.message);
-  } else {
-    console.error(err);
-  }
-  server.close(() => {
-    process.exit(1);
-  });
-});
+start();
