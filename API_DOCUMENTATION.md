@@ -9,9 +9,10 @@ http://localhost:3018/api
 1. [Authentication](#authentication)
 2. [User Management](#user-management)
 3. [Post Management](#post-management)
-4. [Admin Dashboard](#admin-dashboard)
-5. [Rate Limiting](#rate-limiting)
-6. [Error Responses](#error-responses)
+4. [Comment Management](#comment-management)
+5. [Admin Dashboard](#admin-dashboard)
+6. [Rate Limiting](#rate-limiting)
+7. [Error Responses](#error-responses)
 
 ---
 
@@ -20,7 +21,7 @@ http://localhost:3018/api
 ### Register User
 Create a new user account.
 
-**Endpoint:** `POST /auth/register`
+**Endpoint:** `POST /v1/auth/register`
 **Rate Limit:** 3 requests per hour per IP
 **Authentication:** Not required
 
@@ -43,7 +44,7 @@ Create a new user account.
     "name": "John Doe",
     "role": "user",
     "permissions": ["posts:create", "posts:edit:own", "posts:delete:own", "posts:view", "comments:create", "comments:edit:own", "comments:delete:own"],
-    "created_at": "2026-01-13T17:00:00.000Z"
+    "createdAt": "2026-01-13T17:00:00.000Z"
   },
   "success": true
 }
@@ -51,7 +52,7 @@ Create a new user account.
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/auth/register \
+curl -X POST http://localhost:3018/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -65,7 +66,7 @@ curl -X POST http://localhost:3018/api/auth/register \
 ### Login
 Authenticate and receive access and refresh tokens.
 
-**Endpoint:** `POST /auth/login`
+**Endpoint:** `POST /v1/auth/login`
 **Rate Limit:** 5 attempts per 15 minutes per IP
 **Authentication:** Not required
 
@@ -98,7 +99,7 @@ Authenticate and receive access and refresh tokens.
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/auth/login \
+curl -X POST http://localhost:3018/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -111,7 +112,7 @@ curl -X POST http://localhost:3018/api/auth/login \
 ### Refresh Token
 Get a new access token using a refresh token.
 
-**Endpoint:** `POST /auth/refresh-token`
+**Endpoint:** `POST /v1/auth/refresh-token`
 **Rate Limit:** 10 requests per 15 minutes per IP
 **Authentication:** Not required
 
@@ -142,7 +143,7 @@ Get a new access token using a refresh token.
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/auth/refresh-token \
+curl -X POST http://localhost:3018/api/v1/auth/refresh-token \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "a1b2c3d4e5f6..."
@@ -154,7 +155,7 @@ curl -X POST http://localhost:3018/api/auth/refresh-token \
 ### Logout
 Invalidate the current session.
 
-**Endpoint:** `POST /auth/logout`
+**Endpoint:** `POST /v1/auth/logout`
 **Authentication:** Required (Bearer token)
 
 **Headers:**
@@ -172,7 +173,7 @@ Authorization: Bearer <access_token>
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/auth/logout \
+curl -X POST http://localhost:3018/api/v1/auth/logout \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
@@ -183,7 +184,7 @@ curl -X POST http://localhost:3018/api/auth/logout \
 ### List Users
 Get a paginated list of users (requires `users:view` permission).
 
-**Endpoint:** `GET /auth/users`
+**Endpoint:** `GET /v1/auth/users`
 **Authentication:** Required
 **Required Permission:** `users:view`
 
@@ -204,7 +205,7 @@ Get a paginated list of users (requires `users:view` permission).
       "role": "user",
       "permissions": ["posts:create", "posts:edit:own", "posts:delete:own", "posts:view"],
       "customPermissions": [],
-      "created_at": "2026-01-13T17:00:00.000Z"
+      "createdAt": "2026-01-13T17:00:00.000Z"
     }
   ],
   "success": true
@@ -213,7 +214,7 @@ Get a paginated list of users (requires `users:view` permission).
 
 **cURL Example:**
 ```bash
-curl -X GET "http://localhost:3018/api/auth/users?page=1&limit=10" \
+curl -X GET "http://localhost:3018/api/v1/auth/users?page=1&limit=10" \
   -H "Authorization: Bearer <access_token>"
 ```
 
@@ -222,7 +223,7 @@ curl -X GET "http://localhost:3018/api/auth/users?page=1&limit=10" \
 ### Update User Role
 Update a user's role (requires `users:manage` permission - ADMIN only).
 
-**Endpoint:** `POST /auth/users/:userId/role`
+**Endpoint:** `POST /v1/auth/users/:userId/role`
 **Authentication:** Required
 **Required Permission:** `users:manage` (ADMIN only)
 
@@ -250,7 +251,7 @@ Update a user's role (requires `users:manage` permission - ADMIN only).
 
 **cURL Example (Promote user to admin):**
 ```bash
-curl -X POST http://localhost:3018/api/auth/users/507f1f77bcf86cd799439011/role \
+curl -X POST http://localhost:3018/api/v1/auth/users/507f1f77bcf86cd799439011/role \
   -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -263,7 +264,7 @@ curl -X POST http://localhost:3018/api/auth/users/507f1f77bcf86cd799439011/role 
 ### Update User Permissions
 Add or remove custom permissions for a user (requires `permissions:manage` permission - ADMIN only).
 
-**Endpoint:** `POST /auth/users/:userId/permissions`
+**Endpoint:** `POST /v1/auth/users/:userId/permissions`
 **Authentication:** Required
 **Required Permission:** `permissions:manage` (ADMIN only)
 
@@ -292,7 +293,7 @@ Add or remove custom permissions for a user (requires `permissions:manage` permi
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/auth/users/507f1f77bcf86cd799439011/permissions \
+curl -X POST http://localhost:3018/api/v1/auth/users/507f1f77bcf86cd799439011/permissions \
   -H "Authorization: Bearer <admin_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -349,7 +350,7 @@ curl -X GET http://localhost:3018/api/v1/admin/dashboard \
 ### Create Post
 Create a new blog post (requires `posts:create` permission).
 
-**Endpoint:** `POST /api/posts`
+**Endpoint:** `POST /v1/posts`
 **Authentication:** Required
 **Required Permission:** `posts:create`
 
@@ -379,8 +380,8 @@ Create a new blog post (requires `posts:create` permission).
     "status": "draft",
     "tags": ["technology", "coding"],
     "slug": "my-first-blog-post",
-    "created_at": "2026-01-13T17:30:00.000Z",
-    "updated_at": "2026-01-13T17:30:00.000Z"
+    "createdAt": "2026-01-13T17:30:00.000Z",
+    "updatedAt": "2026-01-13T17:30:00.000Z"
   },
   "success": true
 }
@@ -388,7 +389,7 @@ Create a new blog post (requires `posts:create` permission).
 
 **cURL Example:**
 ```bash
-curl -X POST http://localhost:3018/api/posts \
+curl -X POST http://localhost:3018/api/v1/posts \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -404,7 +405,7 @@ curl -X POST http://localhost:3018/api/posts \
 ### Update Post
 Update an existing post (requires `posts:edit:own` permission or admin role).
 
-**Endpoint:** `PUT /api/posts/:postId`
+**Endpoint:** `PUT /v1/posts/:postId`
 **Authentication:** Required
 **Required Permission:** `posts:edit:own` (own posts) or `posts:manage:all` (any post)
 
@@ -433,8 +434,8 @@ Update an existing post (requires `posts:edit:own` permission or admin role).
     "status": "published",
     "tags": ["technology", "coding"],
     "slug": "my-first-blog-post",
-    "created_at": "2026-01-13T17:30:00.000Z",
-    "updated_at": "2026-01-13T17:35:00.000Z"
+    "createdAt": "2026-01-13T17:30:00.000Z",
+    "updatedAt": "2026-01-13T17:35:00.000Z"
   },
   "success": true
 }
@@ -442,7 +443,7 @@ Update an existing post (requires `posts:edit:own` permission or admin role).
 
 **cURL Example:**
 ```bash
-curl -X PUT http://localhost:3018/api/posts/507f1f77bcf86cd799439012 \
+curl -X PUT http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012 \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -456,7 +457,7 @@ curl -X PUT http://localhost:3018/api/posts/507f1f77bcf86cd799439012 \
 ### Delete Post
 Delete a post (requires `posts:delete:own` permission or admin role).
 
-**Endpoint:** `DELETE /api/posts/:postId`
+**Endpoint:** `DELETE /v1/posts/:postId`
 **Authentication:** Required
 **Required Permission:** `posts:delete:own` (own posts) or `posts:manage:all` (any post)
 
@@ -470,7 +471,7 @@ Delete a post (requires `posts:delete:own` permission or admin role).
 
 **cURL Example:**
 ```bash
-curl -X DELETE http://localhost:3018/api/posts/507f1f77bcf86cd799439012 \
+curl -X DELETE http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012 \
   -H "Authorization: Bearer <access_token>"
 ```
 
@@ -479,7 +480,7 @@ curl -X DELETE http://localhost:3018/api/posts/507f1f77bcf86cd799439012 \
 ### Get Single Post
 Retrieve a single post by ID.
 
-**Endpoint:** `GET /api/posts/:postId`
+**Endpoint:** `GET /v1/posts/:postId`
 **Authentication:** Not required
 
 **Success Response (200):**
@@ -498,8 +499,8 @@ Retrieve a single post by ID.
     "status": "published",
     "tags": ["technology", "coding"],
     "slug": "my-first-blog-post",
-    "created_at": "2026-01-13T17:30:00.000Z",
-    "updated_at": "2026-01-13T17:35:00.000Z"
+    "createdAt": "2026-01-13T17:30:00.000Z",
+    "updatedAt": "2026-01-13T17:35:00.000Z"
   },
   "success": true
 }
@@ -507,7 +508,7 @@ Retrieve a single post by ID.
 
 **cURL Example:**
 ```bash
-curl -X GET http://localhost:3018/api/posts/507f1f77bcf86cd799439012
+curl -X GET http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012
 ```
 
 ---
@@ -515,7 +516,7 @@ curl -X GET http://localhost:3018/api/posts/507f1f77bcf86cd799439012
 ### List All Posts
 Get a paginated list of posts with optional filters.
 
-**Endpoint:** `GET /api/posts`
+**Endpoint:** `GET /v1/posts`
 **Authentication:** Not required
 
 **Query Parameters:**
@@ -541,8 +542,8 @@ Get a paginated list of posts with optional filters.
       "status": "published",
       "tags": ["technology", "coding"],
       "slug": "my-first-blog-post",
-      "created_at": "2026-01-13T17:30:00.000Z",
-      "updated_at": "2026-01-13T17:35:00.000Z"
+      "createdAt": "2026-01-13T17:30:00.000Z",
+      "updatedAt": "2026-01-13T17:35:00.000Z"
     }
   ],
   "pagination": {
@@ -557,7 +558,7 @@ Get a paginated list of posts with optional filters.
 
 **cURL Example:**
 ```bash
-curl -X GET "http://localhost:3018/api/posts?page=1&limit=10&status=published&tags=technology,coding"
+curl -X GET "http://localhost:3018/api/v1/posts?page=1&limit=10&status=published&tags=technology,coding"
 ```
 
 ---
@@ -565,7 +566,7 @@ curl -X GET "http://localhost:3018/api/posts?page=1&limit=10&status=published&ta
 ### List User Posts
 Get all posts by a specific user.
 
-**Endpoint:** `GET /api/posts/user/:userId`
+**Endpoint:** `GET /v1/posts/user/:userId`
 **Authentication:** Not required
 
 **Query Parameters:**
@@ -590,7 +591,164 @@ Get all posts by a specific user.
 
 **cURL Example:**
 ```bash
-curl -X GET "http://localhost:3018/api/posts/user/507f1f77bcf86cd799439011?page=1&limit=10"
+curl -X GET "http://localhost:3018/api/v1/posts/user/507f1f77bcf86cd799439011?page=1&limit=10"
+```
+
+---
+
+## Comment Management
+
+### Create Comment
+Add a new comment to a post (requires `comments:create` permission).
+
+**Endpoint:** `POST /v1/posts/:postId/comments`
+**Authentication:** Required
+**Required Permission:** `comments:create`
+
+**Request Body:**
+```json
+{
+  "content": "This is a great post!"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "message": "Comment created successfully",
+  "data": {
+    "id": "507f1f77bcf86cd799439013",
+    "content": "This is a great post!",
+    "author": {
+      "id": "507f1f77bcf86cd799439011",
+      "name": "John Doe"
+    },
+    "post": "507f1f77bcf86cd799439012",
+    "createdAt": "2026-01-13T18:00:00.000Z",
+    "updatedAt": "2026-01-13T18:00:00.000Z"
+  },
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X POST http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012/comments \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "This is a great post!"
+  }'
+```
+
+---
+
+### List Post Comments
+Get a paginated list of comments for a specific post.
+
+**Endpoint:** `GET /v1/posts/:postId/comments`
+**Authentication:** Not required
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+
+**Success Response (200):**
+```json
+{
+  "message": "Comments retrieved successfully",
+  "data": [
+    {
+      "id": "507f1f77bcf86cd799439013",
+      "content": "This is a great post!",
+      "author": {
+        "id": "507f1f77bcf86cd799439011",
+        "name": "John Doe"
+      },
+      "createdAt": "2026-01-13T18:00:00.000Z",
+      "updatedAt": "2026-01-13T18:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  },
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X GET "http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012/comments?page=1&limit=10"
+```
+
+---
+
+### Update Comment
+Update an existing comment (requires `comments:edit:own` permission or admin role).
+
+**Endpoint:** `PUT /v1/comments/:commentId`
+**Authentication:** Required
+**Required Permission:** `comments:edit:own` (own comments) or `comments:manage:all` (any comment)
+
+**Request Body:**
+```json
+{
+  "content": "Updated comment content..."
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "message": "Comment updated successfully",
+  "data": {
+    "id": "507f1f77bcf86cd799439013",
+    "content": "Updated comment content...",
+    "author": {
+      "id": "507f1f77bcf86cd799439011",
+      "name": "John Doe"
+    },
+    "createdAt": "2026-01-13T18:00:00.000Z",
+    "updatedAt": "2026-01-13T18:05:00.000Z"
+  },
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X PUT http://localhost:3018/api/v1/comments/507f1f77bcf86cd799439013 \
+  -H "Authorization: Bearer <access_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Updated comment content..."
+  }'
+```
+
+---
+
+### Delete Comment
+Delete a comment (requires `comments:delete:own` permission or admin role).
+
+**Endpoint:** `DELETE /v1/comments/:commentId`
+**Authentication:** Required
+**Required Permission:** `comments:delete:own` (own comments) or `comments:manage:all` (any comment)
+
+**Success Response (200):**
+```json
+{
+  "message": "Comment deleted successfully",
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X DELETE http://localhost:3018/api/v1/comments/507f1f77bcf86cd799439013 \
+  -H "Authorization: Bearer <access_token>"
 ```
 
 ---
