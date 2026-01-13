@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ActivityLogService } from '../services/activity-log.service';
 
+
 export const createActivityLogger = (activityLogService: ActivityLogService) => {
     return (action: string, resource: string) => {
         return (req: Request, res: Response, next: NextFunction) => {
@@ -11,7 +12,7 @@ export const createActivityLogger = (activityLogService: ActivityLogService) => 
                     const userId = req.user?.id;
                     if (userId) {
                         // Extract resource ID if available in params or body
-                        const resourceId = req.params.postId || req.params.commentId || req.params.userId || (body.data && body.data.id) || (body.data && body.data._id);
+                        const resourceId = req.params.postId || req.params.commentId || req.params.userId || (body.data && body.data.id) || (body.data && body.data.id);
 
                         activityLogService.logActivity({
                             userId,

@@ -7,7 +7,7 @@ export class PostRepository {
     }
 
     async findById(postId: string): Promise<(Post & Document) | null> {
-        return await PostModel.findOne({ _id: postId, deletedAt: null }).populate('author', 'name email');
+        return await PostModel.findOne({ id: postId, deletedAt: null }).populate('author', 'name email');
     }
 
     async findByAuthor(
@@ -66,7 +66,7 @@ export class PostRepository {
 
     async update(postId: string, data: Partial<Post>): Promise<(Post & Document) | null> {
         return await PostModel.findOneAndUpdate(
-            { _id: postId, deletedAt: null },
+            { id: postId, deletedAt: null },
             { $set: data },
             { new: true, runValidators: true }
         ).populate('author', 'name email');
@@ -110,7 +110,7 @@ export class PostRepository {
 
     async updateStatus(postId: string, status: PostStatus): Promise<(Post & Document) | null> {
         return await PostModel.findOneAndUpdate(
-            { _id: postId, deletedAt: null },
+            { id: postId, deletedAt: null },
             { $set: { status } },
             { new: true }
         ).populate('author', 'name email');

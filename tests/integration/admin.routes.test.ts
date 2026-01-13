@@ -97,4 +97,38 @@ describe('Admin Integration Tests', () => {
             expect(res.body.success).toBe(false);
         });
     });
+
+    describe('POST /api/v1/posts', () => {
+        it('should allow admin to create a post', async () => {
+            const res = await request(app)
+                .post('/api/v1/posts')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    title: 'Admin Post',
+                    content: 'Content from admin',
+                    status: 'published',
+                    tags: ['admin', 'test']
+                });
+
+            expect(res.status).toBe(201);
+            expect(res.body.success).toBe(true);
+            expect(res.body.data.title).toBe('Admin Post');
+        });
+
+        it('should allow regular user to create a post', async () => {
+            const res = await request(app)
+                .post('/api/v1/posts')
+                .set('Authorization', `Bearer ${userToken}`)
+                .send({
+                    title: 'User Post',
+                    content: 'Content from user',
+                    status: 'published',
+                    tags: ['user', 'test']
+                });
+
+            expect(res.status).toBe(201);
+            expect(res.body.success).toBe(true);
+            expect(res.body.data.title).toBe('User Post');
+        });
+    });
 });

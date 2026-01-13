@@ -62,7 +62,7 @@ describe('AuthService', () => {
 
             userRepository.findByEmail.mockResolvedValue(null);
             userRepository.create.mockResolvedValue({
-                _id: 'userId',
+                id: 'userId',
                 email: payload.email,
                 name: payload.name,
                 role: Role.USER,
@@ -87,7 +87,7 @@ describe('AuthService', () => {
                 device: { ip: '127.0.0.1', userAgent: 'TestAgent' }
             };
 
-            userRepository.findByEmail.mockResolvedValue({ _id: 'existingId' } as any);
+            userRepository.findByEmail.mockResolvedValue({ id: 'existingId' } as any);
 
             await expect(authService.register(payload)).rejects.toThrow('User already exists');
         });
@@ -102,7 +102,7 @@ describe('AuthService', () => {
             };
 
             const mockUser = {
-                _id: 'userId',
+                id: 'userId',
                 email: payload.email,
                 password: 'hashedPassword',
                 role: Role.USER,
@@ -111,7 +111,7 @@ describe('AuthService', () => {
 
             userRepository.findByEmail.mockResolvedValue(mockUser as any);
             sessionService.createSession.mockResolvedValue({
-                session: { _id: 'sessionId' },
+                session: { id: 'sessionId' },
                 refreshToken: 'refreshToken'
             } as any);
 

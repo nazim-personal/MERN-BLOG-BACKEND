@@ -28,11 +28,18 @@ export class CommentService {
             post: payload.postId as any
         });
 
-        logger.info(`Comment created: ${comment._id} by user ${payload.authorId} on post ${payload.postId}`);
+        logger.info(`Comment created: ${comment.id} by user ${payload.authorId} on post ${payload.postId}`);
 
         return {
             message: 'Comment created successfully',
-            data: comment
+            data: {
+                id: comment.id,
+                content: comment.content,
+                author: comment.author,
+                post: comment.post,
+                created_at: (comment as any).created_at,
+                updated_at: (comment as any).updated_at
+            }
         };
     }
 
@@ -48,7 +55,7 @@ export class CommentService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = comment.author._id.toString() === payload.userId;
+        const isOwner = comment.author.id.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
@@ -65,7 +72,14 @@ export class CommentService {
 
         return {
             message: 'Comment updated successfully',
-            data: updatedComment
+            data: {
+                id: updatedComment.id,
+                content: updatedComment.content,
+                author: updatedComment.author,
+                post: updatedComment.post,
+                created_at: (updatedComment as any).created_at,
+                updated_at: (updatedComment as any).updated_at
+            }
         };
     }
 
@@ -80,7 +94,7 @@ export class CommentService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = comment.author._id.toString() === payload.userId;
+        const isOwner = comment.author.id.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
@@ -110,7 +124,14 @@ export class CommentService {
 
         return {
             message: 'Comments retrieved successfully',
-            data: comments,
+            data: comments.map(comment => ({
+                id: comment.id,
+                content: comment.content,
+                author: comment.author,
+                post: comment.post,
+                created_at: (comment as any).created_at,
+                updated_at: (comment as any).updated_at
+            })),
             pagination: {
                 page: payload.page || 1,
                 limit: payload.limit || 10,

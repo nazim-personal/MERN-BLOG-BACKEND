@@ -5,18 +5,6 @@ import { SessionRepository } from '../repositories/session.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { Role, RolePermissions } from '../config/roles';
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        _id: string;
-        role: string;
-        permissions: string[];
-      };
-      sessionId?: string;
-    }
-  }
-}
 
 export const authMiddleware = (
   accessSecret: string,
@@ -68,7 +56,7 @@ export const authMiddleware = (
       const userPermissions = user.permissions || [];
       const mergedPermissions = Array.from(new Set([...rolePermissions, ...userPermissions]));
       req.user = {
-        _id: decoded.userId,
+        id: decoded.userId,
         role: userRole,
         permissions: mergedPermissions
       };

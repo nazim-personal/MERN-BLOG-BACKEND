@@ -7,7 +7,7 @@ export class CommentRepository {
     }
 
     async findById(commentId: string): Promise<(Comment & Document) | null> {
-        return await CommentModel.findOne({ _id: commentId, deletedAt: null })
+        return await CommentModel.findOne({ id: commentId, deletedAt: null })
             .populate('author', 'name email')
             .populate('post', 'title slug');
     }
@@ -56,7 +56,7 @@ export class CommentRepository {
 
     async update(commentId: string, data: Partial<Comment>): Promise<(Comment & Document) | null> {
         return await CommentModel.findOneAndUpdate(
-            { _id: commentId, deletedAt: null },
+            { id: commentId, deletedAt: null },
             { $set: data },
             { new: true, runValidators: true }
         ).populate('author', 'name email');

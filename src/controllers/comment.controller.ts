@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { CommentService } from '../services/comment.service';
 
 export class CommentController {

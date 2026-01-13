@@ -50,7 +50,7 @@ export class AuthService {
         return {
             message: 'User registered successfully',
             data: {
-                _id: user._id,
+                id: user.id,
                 email: user.email,
                 name: user.name,
                 role: userRole,
@@ -83,12 +83,12 @@ export class AuthService {
         }
 
         const { session, refreshToken } = await this.sessionService.createSession(
-            user._id as Types.ObjectId,
+            user.id as Types.ObjectId,
             payload.device
         );
 
         const accessToken = jwt.sign(
-            { userId: user._id, sessionId: session._id },
+            { userId: user.id, sessionId: session.id },
             this.config.jwt.accessSecret,
             { expiresIn: this.config.jwt.accessTTL as any }
         );
@@ -99,7 +99,7 @@ export class AuthService {
                 accessToken,
                 refreshToken,
                 user: {
-                    _id: user._id,
+                    id: user.id,
                     email: user.email,
                     name: user.name,
                     role: user.role || Role.USER,
@@ -132,7 +132,7 @@ export class AuthService {
         }
 
         const accessToken = jwt.sign(
-            { userId: user._id, sessionId: session._id },
+            { userId: user.id, sessionId: session.id },
             this.config.jwt.accessSecret,
             { expiresIn: this.config.jwt.accessTTL as any }
         );
@@ -142,7 +142,7 @@ export class AuthService {
             data: {
                 accessToken,
                 user: {
-                    _id: user._id,
+                    id: user.id,
                     email: user.email,
                     name: user.name,
                     role: user.role || Role.USER,
@@ -180,7 +180,7 @@ export class AuthService {
         return {
             message: 'User role updated successfully',
             data: {
-                _id: user._id,
+                id: user.id,
                 email: user.email,
                 name: user.name,
                 role: user.role,
@@ -224,7 +224,7 @@ export class AuthService {
         return {
             message: 'User permissions updated successfully',
             data: {
-                _id: updatedUser._id,
+                id: updatedUser.id,
                 email: updatedUser.email,
                 customPermissions: updatedUser.permissions,
                 rolePermissions: RolePermissions[updatedUser.role as Role] || [],
@@ -250,7 +250,7 @@ export class AuthService {
         return {
             message: 'Users retrieved successfully',
             data: users.map(user => ({
-                _id: user._id,
+                id: user.id,
                 email: user.email,
                 name: user.name,
                 role: user.role || Role.USER,
