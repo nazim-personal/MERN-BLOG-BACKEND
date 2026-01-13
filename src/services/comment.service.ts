@@ -55,7 +55,8 @@ export class CommentService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = comment.author.id.toString() === payload.userId;
+        const authorId = (comment.author as any)._id || comment.author;
+        const isOwner = authorId.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
@@ -94,7 +95,8 @@ export class CommentService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = comment.author.id.toString() === payload.userId;
+        const authorId = (comment.author as any)._id || comment.author;
+        const isOwner = authorId.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {

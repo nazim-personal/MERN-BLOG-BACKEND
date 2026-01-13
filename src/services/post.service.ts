@@ -70,7 +70,8 @@ export class PostService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = post.author.toString() === payload.userId;
+        const authorId = (post.author as any)._id || post.author;
+        const isOwner = authorId.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
@@ -118,7 +119,8 @@ export class PostService {
         }
 
         // Check ownership or admin privileges
-        const isOwner = post.author.toString() === payload.userId;
+        const authorId = (post.author as any)._id || post.author;
+        const isOwner = authorId.toString() === payload.userId;
         const isAdmin = payload.userRole === Role.ADMIN;
 
         if (!isOwner && !isAdmin) {
