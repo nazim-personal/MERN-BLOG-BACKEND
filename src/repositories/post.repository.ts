@@ -7,7 +7,7 @@ export class PostRepository {
     }
 
     async findById(postId: string): Promise<(Post & Document) | null> {
-        return await PostModel.findOne({ id: postId, deletedAt: null }).populate('author', 'name email');
+        return await PostModel.findOne({ _id: new Types.ObjectId(postId), deleted_at: null }).populate('author', 'name email');
     }
 
     async findByAuthor(
@@ -23,7 +23,7 @@ export class PostRepository {
             query.status = options.status;
         }
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
 
         return await PostModel
@@ -53,7 +53,7 @@ export class PostRepository {
             query.tags = { $in: options.tags };
         }
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
 
         return await PostModel
@@ -66,7 +66,7 @@ export class PostRepository {
 
     async update(postId: string, data: Partial<Post>): Promise<(Post & Document) | null> {
         return await PostModel.findOneAndUpdate(
-            { id: postId, deletedAt: null },
+            { _id: new Types.ObjectId(postId), deleted_at: null },
             { $set: data },
             { new: true, runValidators: true }
         ).populate('author', 'name email');
@@ -78,16 +78,16 @@ export class PostRepository {
 
     async softDelete(postId: string): Promise<(Post & Document) | null> {
         return await PostModel.findByIdAndUpdate(
-            postId,
-            { $set: { deletedAt: new Date() } },
+            new Types.ObjectId(postId),
+            { $set: { deleted_at: new Date() } },
             { new: true }
         ).populate('author', 'name email');
     }
 
     async restore(postId: string): Promise<(Post & Document) | null> {
         return await PostModel.findByIdAndUpdate(
-            postId,
-            { $set: { deletedAt: null } },
+            new Types.ObjectId(postId),
+            { $set: { deleted_at: null } },
             { new: true }
         ).populate('author', 'name email');
     }
@@ -101,8 +101,8 @@ export class PostRepository {
         const skip = (page - 1) * limit;
 
         return await PostModel
-            .find({ deletedAt: { $ne: null } })
-            .sort({ deletedAt: -1 })
+            .find({ deleted_at: { $ne: null } })
+            .sort({ deleted_at: -1 })
             .skip(skip)
             .limit(limit)
             .populate('author', 'name email');
@@ -110,7 +110,7 @@ export class PostRepository {
 
     async updateStatus(postId: string, status: PostStatus): Promise<(Post & Document) | null> {
         return await PostModel.findOneAndUpdate(
-            { id: postId, deletedAt: null },
+            { _id: new Types.ObjectId(postId), deleted_at: null },
             { $set: { status } },
             { new: true }
         ).populate('author', 'name email');
@@ -122,7 +122,7 @@ export class PostRepository {
             query.status = status;
         }
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
         return await PostModel.countDocuments(query);
     }
@@ -136,7 +136,7 @@ export class PostRepository {
             query.tags = { $in: tags };
         }
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
         return await PostModel.countDocuments(query);
     }

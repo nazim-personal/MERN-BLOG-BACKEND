@@ -12,19 +12,37 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
     // Handle Zod Validation Errors
     if (err instanceof ZodError) {
+        const validationErrors = err.errors.map((e: any) => {
+            const path = e.path.join('.');
+            let received = 'undefined';
+
+            // Try to find the received value from req
+            if (e.path[0] === 'body') received = JSON.stringify(req.body[e.path[1]]);
+            if (e.path[0] === 'query') received = JSON.stringify(req.query[e.path[1]]);
+            if (e.path[0] === 'params') received = JSON.stringify(req.params[e.path[1]]);
+
+            return {
+                field: path,
+                message: e.message,
+                received
+            };
+        });
+
+        const detailedMessage = `Validation failed: ${validationErrors.map(e => `${e.field}: ${e.message} (received: ${e.received})`).join(', ')}`;
+
         return res.status(400).json({
-            message: 'Validation failed',
-            errors: (err as any).errors.map((e: any) => ({
-                field: e.path.join('.'),
-                message: e.message
-            })),
+            message: detailedMessage,
+            errors: validationErrors,
             success: false
         });
     }
 
     // Handle Mongoose Validation Errors
     if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((val: any) => val.message).join(', ');
+        const message = Object.values(err.errors).map((val: any) => {
+            return `${val.message} (received: ${val.value})`;
+        }).join(', ');
+
         return res.status(400).json({
             message,
             success: false
@@ -33,7 +51,10 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
     // Handle Mongoose Duplicate Key Errors
     if (err.code === 11000) {
-        const message = `Duplicate field value entered`;
+        const field = Object.keys(err.keyValue)[0];
+        const value = err.keyValue[field];
+        const message = `Duplicate field value entered: ${field} (received: ${value})`;
+
         return res.status(400).json({
             message,
             success: false
@@ -42,7 +63,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
     // Handle Mongoose Cast Errors
     if (err.name === 'CastError') {
-        const message = `Invalid ${err.path}: ${err.value}`;
+        const message = `Invalid ${err.path}: ${err.value} (received: ${err.value})`;
         return res.status(400).json({
             message,
             success: false

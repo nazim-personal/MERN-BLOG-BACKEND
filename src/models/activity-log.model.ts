@@ -4,10 +4,10 @@ export interface ActivityLog {
     user: Types.ObjectId;
     action: string;
     resource: string;
-    resourceId?: string;
+    resource_id?: string;
     details?: Record<string, any>;
-    ipAddress?: string;
-    userAgent?: string;
+    ip_address?: string;
+    user_agent?: string;
     created_at?: Date;
 }
 
@@ -15,10 +15,10 @@ const ActivityLogSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     action: { type: String, required: true },
     resource: { type: String, required: true },
-    resourceId: { type: String },
+    resource_id: { type: String },
     details: { type: Schema.Types.Mixed },
-    ipAddress: { type: String },
-    userAgent: { type: String }
+    ip_address: { type: String },
+    user_agent: { type: String }
 }, {
     timestamps: {
         createdAt: 'created_at',

@@ -221,7 +221,7 @@ export class PostService {
                 slug: post.slug,
                 created_at: (post as any).created_at,
                 updated_at: (post as any).updated_at,
-                deletedAt: post.deletedAt
+                deleted_at: post.deleted_at
             })),
             pagination: {
                 page: payload.page || 1,
@@ -265,7 +265,7 @@ export class PostService {
                 slug: post.slug,
                 created_at: (post as any).created_at,
                 updated_at: (post as any).updated_at,
-                deletedAt: post.deletedAt
+                deleted_at: post.deleted_at
             })),
             pagination: {
                 page: payload.page || 1,

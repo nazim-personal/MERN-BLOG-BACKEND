@@ -126,7 +126,7 @@ export class AuthService {
             throw new Error('Invalid or expired refresh token');
         }
 
-        const user = await this.userRepository.findById(session.userId as any);
+        const user = await this.userRepository.findById(session.user_id as any);
         if (!user) {
             throw new Error('User not found');
         }

@@ -13,7 +13,7 @@ export interface Post {
     status: PostStatus;
     tags: string[];
     slug: string;
-    deletedAt?: Date | null;
+    deleted_at?: Date | null;
     created_at?: Date;
     updated_at?: Date;
 }
@@ -30,7 +30,7 @@ const PostSchema = new Schema({
     },
     tags: { type: [String], default: [] },
     slug: { type: String, unique: true, sparse: true },
-    deletedAt: { type: Date, default: null }
+    deleted_at: { type: Date, default: null }
 }, {
     timestamps: {
         createdAt: 'created_at',
@@ -41,14 +41,14 @@ const PostSchema = new Schema({
 
 // Virtual for isDeleted
 PostSchema.virtual('isDeleted').get(function() {
-    return this.deletedAt !== null;
+    return this.deleted_at !== null;
 });
 
 // Indexes for efficient querying
 PostSchema.index({ author: 1, status: 1 });
-PostSchema.index({ author: 1, deletedAt: 1 });
+PostSchema.index({ author: 1, deleted_at: 1 });
 PostSchema.index({ created_at: -1 });
-PostSchema.index({ deletedAt: 1 });
+PostSchema.index({ deleted_at: 1 });
 PostSchema.index({ tags: 1 });
 
 // Generate slug from title before saving

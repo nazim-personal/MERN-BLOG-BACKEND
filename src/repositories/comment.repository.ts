@@ -1,5 +1,5 @@
 import { CommentModel, Comment } from '../models/comment.model';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export class CommentRepository {
     async create(data: Partial<Comment>): Promise<Comment & Document> {
@@ -7,7 +7,7 @@ export class CommentRepository {
     }
 
     async findById(commentId: string): Promise<(Comment & Document) | null> {
-        return await CommentModel.findOne({ id: commentId, deletedAt: null })
+        return await CommentModel.findOne({ _id: commentId, deleted_at: null })
             .populate('author', 'name email')
             .populate('post', 'title slug');
     }
@@ -22,7 +22,7 @@ export class CommentRepository {
 
         const query: any = { post: postId };
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
 
         return await CommentModel
@@ -43,7 +43,7 @@ export class CommentRepository {
 
         const query: any = { author: authorId };
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
 
         return await CommentModel
@@ -56,7 +56,7 @@ export class CommentRepository {
 
     async update(commentId: string, data: Partial<Comment>): Promise<(Comment & Document) | null> {
         return await CommentModel.findOneAndUpdate(
-            { id: commentId, deletedAt: null },
+            { _id: new Types.ObjectId(commentId), deleted_at: null },
             { $set: data },
             { new: true, runValidators: true }
         ).populate('author', 'name email');
@@ -65,7 +65,7 @@ export class CommentRepository {
     async softDelete(commentId: string): Promise<(Comment & Document) | null> {
         return await CommentModel.findByIdAndUpdate(
             commentId,
-            { $set: { deletedAt: new Date() } },
+            { $set: { deleted_at: new Date() } },
             { new: true }
         );
     }
@@ -73,7 +73,7 @@ export class CommentRepository {
     async restore(commentId: string): Promise<(Comment & Document) | null> {
         return await CommentModel.findByIdAndUpdate(
             commentId,
-            { $set: { deletedAt: null } },
+            { $set: { deleted_at: null } },
             { new: true }
         );
     }
@@ -81,7 +81,7 @@ export class CommentRepository {
     async countByPost(postId: string, includeDeleted?: boolean): Promise<number> {
         const query: any = { post: postId };
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
         return await CommentModel.countDocuments(query);
     }
@@ -89,7 +89,7 @@ export class CommentRepository {
     async countAll(includeDeleted?: boolean): Promise<number> {
         const query: any = {};
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.deleted_at = null;
         }
         return await CommentModel.countDocuments(query);
     }

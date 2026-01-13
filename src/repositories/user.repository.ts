@@ -8,7 +8,7 @@ export class UserRepository {
     }
 
     async findById(userId: Types.ObjectId) {
-        return UserModel.findById(userId);
+        return UserModel.findById(new Types.ObjectId(userId));
     }
 
     async create(data: {
@@ -21,7 +21,7 @@ export class UserRepository {
     }
 
     async delete(userId: string): Promise<void> {
-        await UserModel.findByIdAndDelete(userId);
+        await UserModel.findByIdAndDelete(new Types.ObjectId(userId));
     }
 
     async countAll(): Promise<number> {
@@ -34,7 +34,7 @@ export class UserRepository {
 
     async updateRole(userId: string, role: string) {
         return UserModel.findByIdAndUpdate(
-            userId,
+            new Types.ObjectId(userId),
             { role },
             { new: true }
         );
@@ -42,7 +42,7 @@ export class UserRepository {
 
     async updatePermissions(userId: string, permissions: string[]) {
         return UserModel.findByIdAndUpdate(
-            userId,
+            new Types.ObjectId(userId),
             { permissions },
             { new: true }
         );
@@ -61,6 +61,7 @@ export class UserRepository {
         const skip = (filters.page - 1) * filters.limit;
 
         return UserModel.find(query)
+            .sort({ created_at: -1 })
             .skip(skip)
             .limit(filters.limit)
             .select('-password')
