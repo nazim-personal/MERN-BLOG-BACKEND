@@ -48,7 +48,7 @@ export const createAuthRoutes = (
         (req, res, next) => {
             passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
                 if (err || !user) {
-                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                     return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(info?.message || 'Authentication failed')}`);
                 }
                 req.user = user;
@@ -66,7 +66,7 @@ export const createAuthRoutes = (
         (req, res, next) => {
             passport.authenticate('facebook', { session: false }, (err: any, user: any, info: any) => {
                 if (err || !user) {
-                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                     return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(info?.message || 'Authentication failed')}`);
                 }
                 req.user = user;

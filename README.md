@@ -46,7 +46,7 @@ JWT_ACCESS_TTL=15m
 JWT_REFRESH_SECRET=your-super-secret-refresh-key
 JWT_REFRESH_TTL_MS=604800000
 SESSION_SECRET=your-super-secret-session-key
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=http://localhost:3000
 ```
 
 4. **Start MongoDB**
@@ -233,7 +233,7 @@ curl -X POST http://localhost:3018/api/posts \
 | `JWT_REFRESH_SECRET` | Secret for refresh tokens | `refresh-secret` |
 | `JWT_REFRESH_TTL_MS` | Refresh token expiration (ms) | `604800000` (7 days) |
 | `SESSION_SECRET` | Session secret | `session-secret` |
-| `CORS_ORIGIN` | Allowed CORS origin | `http://localhost:5173` |
+| `CORS_ORIGIN` | Allowed CORS origin | `http://localhost:3000` |
 
 ## Documentation
 

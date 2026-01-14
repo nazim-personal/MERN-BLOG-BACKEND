@@ -202,7 +202,7 @@ Handle Google OAuth callback.
 
 **Success Response:**
 - Redirects to the frontend application with tokens in query parameters.
-- Example: `http://localhost:5173/dashboard?token=...&refreshToken=...`
+- Example: `http://localhost:3000/dashboard?token=...&refreshToken=...`
 
 #### Facebook Login
 Initiate Facebook OAuth flow.
@@ -222,7 +222,7 @@ Handle Facebook OAuth callback.
 
 **Success Response:**
 - Redirects to the frontend application with tokens in query parameters.
-- Example: `http://localhost:5173/dashboard?accessToken=...&refreshToken=...`
+- Example: `http://localhost:3000/dashboard?accessToken=...&refreshToken=...`
 
 ---
 

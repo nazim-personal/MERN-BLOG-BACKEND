@@ -67,7 +67,7 @@ export class AuthController {
         try {
             const user = req.user;
             if (!user) {
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
                 return res.redirect(`${frontendUrl}/signin?error=Authentication failed`);
             }
 
@@ -85,7 +85,7 @@ export class AuthController {
             // But typically OAuth callback is a full page redirect.
             // Let's assume we redirect to a frontend URL with tokens.
 
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
             const { accessToken, refreshToken } = result.data;
 
             res.redirect(
@@ -93,7 +93,7 @@ export class AuthController {
             );
 
         } catch (error: any) {
-             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
              res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message)}`);
         }
     };
