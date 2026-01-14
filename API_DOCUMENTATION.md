@@ -608,9 +608,12 @@ Add a new comment to a post (requires `comments:create` permission).
 **Request Body:**
 ```json
 {
-  "content": "This is a great post!"
+  "content": "This is a great post!",
+  "parentId": "507f1f77bcf86cd799439013"
 }
 ```
+
+**Note**: `parentId` is optional and used for nested comments (replies).
 
 **Success Response (201):**
 ```json
@@ -624,6 +627,7 @@ Add a new comment to a post (requires `comments:create` permission).
       "name": "John Doe"
     },
     "post": "507f1f77bcf86cd799439012",
+    "parentId": "507f1f77bcf86cd799439013",
     "createdAt": "2026-01-13T18:00:00.000Z",
     "updatedAt": "2026-01-13T18:00:00.000Z"
   },
@@ -637,7 +641,8 @@ curl -X POST http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012/comment
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "content": "This is a great post!"
+    "content": "This is a great reply!",
+    "parentId": "507f1f77bcf86cd799439013"
   }'
 ```
 
@@ -652,8 +657,9 @@ Get a paginated list of comments for a specific post.
 **Query Parameters:**
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 10)
+- `nested` (optional): Set to `true` to get hierarchical comment tree with nested replies (default: false)
 
-**Success Response (200):**
+**Success Response (200) - Default (flat list):**
 ```json
 {
   "message": "Comments retrieved successfully",
@@ -665,6 +671,9 @@ Get a paginated list of comments for a specific post.
         "id": "507f1f77bcf86cd799439011",
         "name": "John Doe"
       },
+      "post": "507f1f77bcf86cd799439012",
+      "parentId": null,
+      "replyCount": 2,
       "createdAt": "2026-01-13T18:00:00.000Z",
       "updatedAt": "2026-01-13T18:00:00.000Z"
     }
@@ -679,9 +688,120 @@ Get a paginated list of comments for a specific post.
 }
 ```
 
-**cURL Example:**
+**Success Response (200) - Nested (hierarchical tree):**
+```json
+{
+  "message": "Comments retrieved successfully",
+  "data": [
+    {
+      "id": "507f1f77bcf86cd799439013",
+      "content": "This is a great post!",
+      "author": {
+        "id": "507f1f77bcf86cd799439011",
+        "name": "John Doe"
+      },
+      "post": "507f1f77bcf86cd799439012",
+      "parentId": null,
+      "replyCount": 2,
+      "createdAt": "2026-01-13T18:00:00.000Z",
+      "updatedAt": "2026-01-13T18:00:00.000Z",
+      "replies": [
+        {
+          "id": "507f1f77bcf86cd799439014",
+          "content": "I agree!",
+          "author": {
+            "id": "507f1f77bcf86cd799439015",
+            "name": "Jane Smith"
+          },
+          "post": "507f1f77bcf86cd799439012",
+          "parentId": "507f1f77bcf86cd799439013",
+          "replyCount": 1,
+          "createdAt": "2026-01-13T18:05:00.000Z",
+          "updatedAt": "2026-01-13T18:05:00.000Z",
+          "replies": [
+            {
+              "id": "507f1f77bcf86cd799439016",
+              "content": "Me too!",
+              "author": {
+                "id": "507f1f77bcf86cd799439017",
+                "name": "Bob Johnson"
+              },
+              "post": "507f1f77bcf86cd799439012",
+              "parentId": "507f1f77bcf86cd799439014",
+              "replyCount": 0,
+              "createdAt": "2026-01-13T18:10:00.000Z",
+              "updatedAt": "2026-01-13T18:10:00.000Z",
+              "replies": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  },
+  "success": true
+}
+```
+
+**cURL Example (flat list):**
 ```bash
 curl -X GET "http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012/comments?page=1&limit=10"
+```
+
+**cURL Example (nested tree):**
+```bash
+curl -X GET "http://localhost:3018/api/v1/posts/507f1f77bcf86cd799439012/comments?page=1&limit=10&nested=true"
+```
+
+---
+
+### Get Comment Replies
+Get a paginated list of replies for a specific comment.
+
+**Endpoint:** `GET /v1/comments/:commentId/replies`
+**Authentication:** Not required
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+
+**Success Response (200):**
+```json
+{
+  "message": "Replies retrieved successfully",
+  "data": [
+    {
+      "id": "507f1f77bcf86cd799439014",
+      "content": "I agree!",
+      "author": {
+        "id": "507f1f77bcf86cd799439015",
+        "name": "Jane Smith"
+      },
+      "post": "507f1f77bcf86cd799439012",
+      "parentId": "507f1f77bcf86cd799439013",
+      "replyCount": 1,
+      "createdAt": "2026-01-13T18:05:00.000Z",
+      "updatedAt": "2026-01-13T18:05:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1
+  },
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X GET "http://localhost:3018/api/v1/comments/507f1f77bcf86cd799439013/replies?page=1&limit=10"
 ```
 
 ---

@@ -10,7 +10,7 @@ export class CommentController {
 
     public createComment = async (req: Request, res: Response) => {
         try {
-            const { content } = req.body;
+            const { content, parentId } = req.body;
             const { postId } = req.params;
             const authorId = req.user?.id;
 
@@ -24,7 +24,8 @@ export class CommentController {
             const result = await this.commentService.createComment({
                 content,
                 authorId,
-                postId
+                postId,
+                parentId
             });
 
             return res.status(201).json({
@@ -108,10 +109,34 @@ export class CommentController {
     public listPostComments = async (req: Request, res: Response) => {
         try {
             const { postId } = req.params;
-            const { page, limit } = req.query;
+            const { page, limit, nested } = req.query;
 
             const result = await this.commentService.listPostComments({
                 postId,
+                page: page ? parseInt(page as string) : 1,
+                limit: limit ? parseInt(limit as string) : 10,
+                nested: nested === 'true'
+            });
+
+            return res.status(200).json({
+                ...result,
+                success: true
+            });
+        } catch (error: any) {
+            return res.status(400).json({
+                message: error.message,
+                success: false
+            });
+        }
+    };
+
+    public getReplies = async (req: Request, res: Response) => {
+        try {
+            const { commentId } = req.params;
+            const { page, limit } = req.query;
+
+            const result = await this.commentService.getReplies({
+                commentId,
                 page: page ? parseInt(page as string) : 1,
                 limit: limit ? parseInt(limit as string) : 10
             });

@@ -93,4 +93,66 @@ export class CommentRepository {
         }
         return await CommentModel.countDocuments(query);
     }
+
+    async findRootCommentsByPost(
+        postId: string,
+        options: { page?: number; limit?: number; includeDeleted?: boolean }
+    ): Promise<(Comment & Document)[]> {
+        const page = options.page || 1;
+        const limit = options.limit || 10;
+        const skip = (page - 1) * limit;
+
+        const query: any = { post: postId, parentId: null };
+        if (!options.includeDeleted) {
+            query.deletedAt = null;
+        }
+
+        return await CommentModel
+            .find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'name email');
+    }
+
+    async findRepliesByParentId(
+        parentId: string,
+        options: { page?: number; limit?: number; includeDeleted?: boolean }
+    ): Promise<(Comment & Document)[]> {
+        const page = options.page || 1;
+        const limit = options.limit || 10;
+        const skip = (page - 1) * limit;
+
+        const query: any = { parentId };
+        if (!options.includeDeleted) {
+            query.deletedAt = null;
+        }
+
+        return await CommentModel
+            .find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('author', 'name email');
+    }
+
+    async countRepliesByParentId(parentId: string, includeDeleted?: boolean): Promise<number> {
+        const query: any = { parentId };
+        if (!includeDeleted) {
+            query.deletedAt = null;
+        }
+        return await CommentModel.countDocuments(query);
+    }
+
+    async findAllByPost(postId: string, includeDeleted?: boolean): Promise<(Comment & Document)[]> {
+        const query: any = { post: postId };
+        if (!includeDeleted) {
+            query.deletedAt = null;
+        }
+
+        return await CommentModel
+            .find(query)
+            .sort({ createdAt: -1 })
+            .populate('author', 'name email');
+    }
 }

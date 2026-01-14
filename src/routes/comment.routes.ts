@@ -48,5 +48,10 @@ export const createCommentRoutes = (
         commentController.deleteComment
     );
 
+    // Get replies for a specific comment
+    router.get('/comments/:commentId/replies',
+        commentController.getReplies
+    );
+
     return router;
 };
