@@ -91,6 +91,7 @@ export class AuthController {
             res.redirect(
             `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`
             );
+
         } catch (error: any) {
              const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
              res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message)}`);
