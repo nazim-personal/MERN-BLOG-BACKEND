@@ -46,10 +46,11 @@ A secure, scalable, and production-ready RESTful API backend for a blog applicat
 - 🔍 **Advanced Filtering** by status, tags, and author
 
 ### Admin Features
-- 📈 **Dashboard Statistics** (users, posts, comments)
-- 👥 **User Management** (view, update roles, delete)
+- 📈 **Dashboard Statistics** (users, posts, comments) - *Fixed and verified*
+- 👥 **User Management** (view, update name/role, delete)
 - 🔧 **Post Moderation** (approve, reject, delete)
 - 📋 **Activity Logging** for audit trails
+- 🔄 **Automatic Permission Sync** on role changes
 
 ### Security
 - 🛡️ **NoSQL Injection Prevention** (express-mongo-sanitize)
@@ -330,6 +331,8 @@ Authorization: Bearer <access_token>
 - `POST /auth/logout` - Logout and invalidate session
 - `GET /auth/google` - Initiate Google OAuth
 - `GET /auth/facebook` - Initiate Facebook OAuth
+- `PUT /auth/users/:userId` - Update user name/role (owner/admin)
+- `GET /auth/me` - Get current user profile
 
 #### Posts (`/posts`)
 - `GET /posts` - List all posts (with pagination)
@@ -347,9 +350,9 @@ Authorization: Bearer <access_token>
 
 #### Admin (`/admin`)
 - `GET /admin/dashboard` - Get dashboard statistics (admin)
-- `GET /admin/users` - List all users (admin)
-- `PATCH /admin/users/:id/role` - Update user role (admin)
-- `DELETE /admin/users/:id` - Delete user (admin)
+- `GET /auth/users` - List all users (admin)
+- `PUT /auth/users/:userId/role` - Update user role (legacy/admin)
+- `PUT /auth/users/:userId/permissions` - Update user permissions (admin)
 
 ### Request/Response Format
 
