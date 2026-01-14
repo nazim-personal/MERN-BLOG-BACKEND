@@ -35,22 +35,25 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(payload.password, 12);
 
+        const defaultPermissions = RolePermissions[Role.USER] || [];
+
         const user = await this.userRepository.create({
             email: payload.email,
             password: hashedPassword,
             name: payload.name,
+            permissions: defaultPermissions
         });
 
         const userRole = (user.role as Role) || Role.USER;
         const effectivePermissions = Array.from(new Set([
-            ...(RolePermissions[userRole] || []),
+            ...defaultPermissions,
             ...(user.permissions || [])
         ]));
 
         return {
             message: 'User registered successfully',
             data: {
-                id: user.id,
+                id: user._id,
                 email: user.email,
                 name: user.name,
                 role: userRole,
@@ -90,13 +93,14 @@ export class AuthService {
     }
 
     private async generateTokens(user: any, device: { ip: string; userAgent: string }) {
+        const userId = user._id;
         const { session, refreshToken } = await this.sessionService.createSession(
-            user.id as Types.ObjectId,
+            userId as Types.ObjectId,
             device
         );
 
         const accessToken = jwt.sign(
-            { userId: user.id, sessionId: session.id },
+            { userId: userId, sessionId: session._id },
             this.config.jwt.accessSecret,
             { expiresIn: this.config.jwt.accessTTL as any }
         );
@@ -107,7 +111,7 @@ export class AuthService {
                 accessToken,
                 refreshToken,
                 user: {
-                    id: user.id,
+                    id: userId,
                     email: user.email,
                     name: user.name,
                     role: user.role || Role.USER,
@@ -140,7 +144,7 @@ export class AuthService {
         }
 
         const accessToken = jwt.sign(
-            { userId: user.id, sessionId: session.id },
+            { userId: user._id, sessionId: session._id },
             this.config.jwt.accessSecret,
             { expiresIn: this.config.jwt.accessTTL as any }
         );
@@ -150,7 +154,7 @@ export class AuthService {
             data: {
                 accessToken,
                 user: {
-                    id: user.id,
+                    id: user._id,
                     email: user.email,
                     name: user.name,
                     role: user.role || Role.USER,
@@ -188,7 +192,7 @@ export class AuthService {
         return {
             message: 'User role updated successfully',
             data: {
-                id: user.id,
+                id: user._id,
                 email: user.email,
                 name: user.name,
                 role: user.role,
@@ -232,7 +236,7 @@ export class AuthService {
         return {
             message: 'User permissions updated successfully',
             data: {
-                id: updatedUser.id,
+                id: updatedUser._id,
                 email: updatedUser.email,
                 customPermissions: updatedUser.permissions,
                 rolePermissions: RolePermissions[updatedUser.role as Role] || [],
@@ -258,7 +262,7 @@ export class AuthService {
         return {
             message: 'Users retrieved successfully',
             data: users.map(user => ({
-                id: user.id,
+                id: user._id,
                 email: user.email,
                 name: user.name,
                 role: user.role || Role.USER,
@@ -278,7 +282,7 @@ export class AuthService {
         return {
             message: 'User profile retrieved successfully',
             data: {
-                id: user.id,
+                id: user._id,
                 email: user.email,
                 name: user.name,
                 role: user.role || Role.USER,

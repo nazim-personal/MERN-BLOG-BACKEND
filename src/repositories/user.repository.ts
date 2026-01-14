@@ -1,14 +1,21 @@
 import { UserModel } from '../models/user.model';
 import { Types } from 'mongoose';
+import { isValidObjectId, toObjectId } from '../utils/sanitization.util';
+
+const MAX_LIMIT = 100;
 
 export class UserRepository {
 
     async findByEmail(email: string) {
-        return UserModel.findOne({ email });
+        return UserModel.findOne({ email }).lean();
     }
 
-    async findById(userId: Types.ObjectId) {
-        return UserModel.findById(new Types.ObjectId(userId));
+    async findById(userId: Types.ObjectId | string) {
+        if (typeof userId === 'string' && !isValidObjectId(userId)) {
+            return null;
+        }
+        const id = typeof userId === 'string' ? toObjectId(userId) : userId;
+        return UserModel.findById(id).lean();
     }
 
     async create(data: {
@@ -16,12 +23,16 @@ export class UserRepository {
         password?: string;
         name?: string;
         metadata?: Record<string, any>;
+        permissions?: string[];
     }) {
         return UserModel.create(data);
     }
 
     async delete(userId: string): Promise<void> {
-        await UserModel.findByIdAndDelete(new Types.ObjectId(userId));
+        if (!isValidObjectId(userId)) {
+            throw new Error('Invalid user ID');
+        }
+        await UserModel.findByIdAndDelete(toObjectId(userId));
     }
 
     async countAll(): Promise<number> {
@@ -33,19 +44,25 @@ export class UserRepository {
     }
 
     async updateRole(userId: string, role: string) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('Invalid user ID');
+        }
         return UserModel.findByIdAndUpdate(
-            new Types.ObjectId(userId),
+            toObjectId(userId),
             { role },
             { new: true }
-        );
+        ).select('-password').lean();
     }
 
     async updatePermissions(userId: string, permissions: string[]) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('Invalid user ID');
+        }
         return UserModel.findByIdAndUpdate(
-            new Types.ObjectId(userId),
+            toObjectId(userId),
             { permissions },
             { new: true }
-        );
+        ).select('-password').lean();
     }
 
     async findAll(filters: {
@@ -58,13 +75,15 @@ export class UserRepository {
             query.role = filters.role;
         }
 
-        const skip = (filters.page - 1) * filters.limit;
+        const limit = Math.min(filters.limit, MAX_LIMIT);
+        const skip = (filters.page - 1) * limit;
 
         return UserModel.find(query)
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(filters.limit)
+            .limit(limit)
             .select('-password')
+            .lean()
             .exec();
     }
 }

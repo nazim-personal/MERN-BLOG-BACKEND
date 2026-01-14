@@ -58,7 +58,7 @@ export class SessionService {
         }
 
         if (session.expiresAt < new Date()) {
-            await this.sessionRepository.deactivateById(session.id.toString());
+            await this.sessionRepository.deactivateById(session._id.toString());
             return null;
         }
 

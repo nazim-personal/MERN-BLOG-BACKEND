@@ -29,7 +29,8 @@ const ActivityLogSchema = new Schema({
 
 // Indexes for efficient querying
 ActivityLogSchema.index({ user: 1, createdAt: -1 });
-ActivityLogSchema.index({ action: 1 });
+ActivityLogSchema.index({ action: 1, createdAt: -1 });
+ActivityLogSchema.index({ resource: 1, resourceId: 1 }); // For resource-specific queries
 ActivityLogSchema.index({ createdAt: -1 });
 
 export const ActivityLogModel = model<ActivityLog & Document>('ActivityLog', ActivityLogSchema);

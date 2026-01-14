@@ -45,12 +45,12 @@ export class CommentService {
             parentId: payload.parentId as any
         });
 
-        logger.info(`Comment created: ${comment.id} by user ${payload.authorId} on post ${payload.postId}`);
+        logger.info(`Comment created: ${comment._id} by user ${payload.authorId} on post ${payload.postId}`);
 
         return {
             message: 'Comment created successfully',
             data: {
-                id: comment.id,
+                id: comment._id,
                 content: comment.content,
                 author: comment.author,
                 post: comment.post,
@@ -92,7 +92,7 @@ export class CommentService {
         return {
             message: 'Comment updated successfully',
             data: {
-                id: updatedComment.id,
+                id: updatedComment._id,
                 content: updatedComment.content,
                 author: updatedComment.author,
                 post: updatedComment.post,
@@ -176,9 +176,9 @@ export class CommentService {
         return {
             message: 'Comments retrieved successfully',
             data: await Promise.all(comments.map(async comment => {
-                const replyCount = await this.commentRepository.countRepliesByParentId(comment.id);
+                const replyCount = await this.commentRepository.countRepliesByParentId(comment._id);
                 return {
-                    id: comment.id,
+                    id: comment._id,
                     content: comment.content,
                     author: comment.author,
                     post: comment.post,
@@ -217,9 +217,9 @@ export class CommentService {
         return {
             message: 'Replies retrieved successfully',
             data: await Promise.all(replies.map(async reply => {
-                const replyCount = await this.commentRepository.countRepliesByParentId(reply.id);
+                const replyCount = await this.commentRepository.countRepliesByParentId(reply._id);
                 return {
-                    id: reply.id,
+                    id: reply._id,
                     content: reply.content,
                     author: reply.author,
                     post: reply.post,
@@ -246,7 +246,7 @@ export class CommentService {
         // First pass: create comment objects with replies array
         comments.forEach(comment => {
             const commentObj = {
-                id: comment.id,
+                id: comment._id,
                 content: comment.content,
                 author: comment.author,
                 post: comment.post,
@@ -255,12 +255,12 @@ export class CommentService {
                 updatedAt: comment.updatedAt,
                 replies: []
             };
-            commentMap.set(comment.id, commentObj);
+            commentMap.set(comment._id, commentObj);
         });
 
         // Second pass: build the tree structure
         comments.forEach(comment => {
-            const commentObj = commentMap.get(comment.id);
+            const commentObj = commentMap.get(comment._id);
             if (comment.parentId) {
                 const parent = commentMap.get(comment.parentId.toString());
                 if (parent) {

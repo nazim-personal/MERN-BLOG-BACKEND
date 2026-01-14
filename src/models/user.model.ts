@@ -16,8 +16,8 @@ export interface User {
 const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String },
-    googleId: { type: String },
-    facebookId: { type: String },
+    googleId: { type: String, sparse: true },
+    facebookId: { type: String, sparse: true },
     name: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, default: {} },
     role: { type: String, enum: Object.values(Role), default: Role.USER },
@@ -29,5 +29,12 @@ const UserSchema = new Schema({
     },
     versionKey: false
 });
+
+// Compound index for admin queries (list users by role)
+UserSchema.index({ role: 1, createdAt: -1 });
+
+// Partial indexes for social login (only index non-null values)
+UserSchema.index({ googleId: 1 }, { sparse: true, unique: true });
+UserSchema.index({ facebookId: 1 }, { sparse: true, unique: true });
 
 export const UserModel = model<User & Document>('User', UserSchema);

@@ -23,10 +23,19 @@ When you first set up the application, you'll need to manually create a super ad
 # Connect to MongoDB
 mongosh mongodb://localhost:27017/mern-blog-db
 
-# Update an existing user to super_admin
+# Update an existing user to admin
 db.users.updateOne(
   { email: "admin@example.com" },
-  { $set: { role: "super_admin" } }
+  {
+    $set: {
+      role: "admin",
+      permissions: [
+        "users:view", "users:manage", "permissions:manage",
+        "posts:create", "posts:edit:own", "posts:delete:own", "posts:view", "posts:manage:all",
+        "comments:create", "comments:edit:own", "comments:delete:own", "comments:manage:all"
+      ]
+    }
+  }
 )
 ```
 
@@ -86,7 +95,7 @@ curl -X GET "http://localhost:3018/api/auth/users?role=user" \
 
 ### Promote User to Admin
 
-**Important:** Only SUPER_ADMIN can update user roles.
+**Important:** Only admin can update user roles.
 
 ```bash
 curl -X PUT http://localhost:3018/api/auth/users/<USER_ID>/role \
@@ -127,7 +136,7 @@ curl -X PUT http://localhost:3018/api/auth/users/<USER_ID>/role \
   -H "Authorization: Bearer <super_admin_token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "role": "super_admin"
+    "role": "admin"
   }'
 ```
 
@@ -392,7 +401,7 @@ promote_to_admin() {
 
 ### Can't Update User Roles
 
-**Problem:** Getting "Only SUPER_ADMIN can update user roles" error
+**Problem:** Getting "Only admin can update user roles" error
 
 **Solution:** Ensure you're using a super admin token. Verify your role:
 ```bash
@@ -423,13 +432,13 @@ curl -X POST http://localhost:3018/api/auth/refresh-token \
 
 ### Role Hierarchy
 ```
-SUPER_ADMIN > ADMIN > USER
+admin > ADMIN > USER
 ```
 
 ### Permission Levels
 - **USER:** Basic permissions (profile, settings, own posts)
 - **ADMIN:** User permissions + view users + manage all posts
-- **SUPER_ADMIN:** Admin permissions + manage roles + manage permissions
+- **admin:** Admin permissions + manage roles + manage permissions
 
 ### Key Endpoints
 - Update role: `PUT /api/auth/users/:userId/role`

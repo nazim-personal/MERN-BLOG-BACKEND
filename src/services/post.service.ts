@@ -33,16 +33,16 @@ export class PostService {
             tags: payload.tags || []
         });
 
-        logger.info(`Post created: ${post.id} by user ${payload.authorId}`);
+        logger.info(`Post created: ${post._id} by user ${payload.authorId}`);
 
         return {
             message: 'Post created successfully',
             data: {
-                id: post.id,
+                id: post._id,
                 title: post.title,
                 content: post.content,
                 author: {
-                    id: author.id,
+                    id: author._id,
                     name: author.name,
                     email: author.email
                 },
@@ -95,7 +95,7 @@ export class PostService {
         return {
             message: 'Post updated successfully',
             data: {
-                id: updatedPost.id,
+                id: updatedPost._id,
                 title: updatedPost.title,
                 content: updatedPost.content,
                 author: (updatedPost as any).author,
@@ -165,7 +165,7 @@ export class PostService {
         return {
             message: 'Post restored successfully',
             data: {
-                id: restoredPost.id,
+                id: restoredPost._id,
                 title: restoredPost.title,
                 status: restoredPost.status
             }
@@ -181,7 +181,7 @@ export class PostService {
         return {
             message: 'Post retrieved successfully',
             data: {
-                id: post.id,
+                id: post._id,
                 title: post.title,
                 content: post.content,
                 author: (post as any).author,
@@ -214,7 +214,7 @@ export class PostService {
         return {
             message: 'Posts retrieved successfully',
             data: posts.map(post => ({
-                id: post.id,
+                id: post._id,
                 title: post.title,
                 content: post.content.substring(0, 200) + (post.content.length > 200 ? '...' : ''),
                 author: (post as any).author,
@@ -258,7 +258,7 @@ export class PostService {
         return {
             message: 'User posts retrieved successfully',
             data: posts.map(post => ({
-                id: post.id,
+                id: post._id,
                 title: post.title,
                 content: post.content.substring(0, 200) + (post.content.length > 200 ? '...' : ''),
                 author: (post as any).author,

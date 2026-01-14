@@ -3,12 +3,18 @@ import { AppError } from './custom-errors';
 import { logger } from '../utils/logger';
 import { ZodError } from 'zod';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
     let error = { ...err };
     error.message = err.message;
 
-    // Log the error
-    logger.error(`Error: ${err.message} - Stack: ${err.stack}`);
+    // Log the error with full details (including stack trace)
+    if (isProduction) {
+        logger.error(`Error: ${err.message}`);
+    } else {
+        logger.error(`Error: ${err.message} - Stack: ${err.stack}`);
+    }
 
     // Handle Zod Validation Errors
     if (err instanceof ZodError) {
@@ -24,11 +30,13 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
             return {
                 field: path,
                 message: e.message,
-                received
+                received: isProduction ? undefined : received // Hide received values in production
             };
         });
 
-        const detailedMessage = `Validation failed: ${validationErrors.map(e => `${e.field}: ${e.message} (received: ${e.received})`).join(', ')}`;
+        const detailedMessage = isProduction
+            ? 'Validation failed. Please check your input.'
+            : `Validation failed: ${validationErrors.map(e => `${e.field}: ${e.message} (received: ${e.received})`).join(', ')}`;
 
         return res.status(400).json({
             message: detailedMessage,
@@ -39,9 +47,11 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
     // Handle Mongoose Validation Errors
     if (err.name === 'ValidationError') {
-        const message = Object.values(err.errors).map((val: any) => {
-            return `${val.message} (received: ${val.value})`;
-        }).join(', ');
+        const message = isProduction
+            ? 'Validation error occurred'
+            : Object.values(err.errors).map((val: any) => {
+                return `${val.message} (received: ${val.value})`;
+            }).join(', ');
 
         return res.status(400).json({
             message,
@@ -53,7 +63,9 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     if (err.code === 11000) {
         const field = Object.keys(err.keyValue)[0];
         const value = err.keyValue[field];
-        const message = `Duplicate field value entered: ${field} (received: ${value})`;
+        const message = isProduction
+            ? `Duplicate value for field: ${field}`
+            : `Duplicate field value entered: ${field} (received: ${value})`;
 
         return res.status(400).json({
             message,
@@ -63,7 +75,10 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
     // Handle Mongoose Cast Errors
     if (err.name === 'CastError') {
-        const message = `Invalid ${err.path}: ${err.value} (received: ${err.value})`;
+        const message = isProduction
+            ? 'Invalid data format'
+            : `Invalid ${err.path}: ${err.value} (received: ${err.value})`;
+
         return res.status(400).json({
             message,
             success: false
@@ -93,9 +108,9 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
         });
     }
 
-    // Default Error Response
+    // Default Error Response - Never expose internal details in production
     return res.status(500).json({
-        message: 'Internal Server Error',
+        message: isProduction ? 'Internal Server Error' : err.message || 'Internal Server Error',
         success: false
     });
 };

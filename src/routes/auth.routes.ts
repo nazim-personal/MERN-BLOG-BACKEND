@@ -34,6 +34,14 @@ export const createAuthRoutes = (
         authController.login
     );
 
+    // Alias for login
+    router.post('/signin',
+        loginRateLimiter,
+        validate(loginSchema),
+        activityLogger('login', 'user'),
+        authController.login
+    );
+
     router.post('/refresh-token',
         refreshTokenRateLimiter,
         authController.refreshToken

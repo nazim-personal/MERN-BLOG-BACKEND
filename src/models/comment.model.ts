@@ -29,9 +29,12 @@ CommentSchema.virtual('isDeleted').get(function() {
     return this.deletedAt !== null;
 });
 
-// Indexes for efficient querying
+// Compound indexes for efficient querying
 CommentSchema.index({ post: 1, createdAt: -1 });
 CommentSchema.index({ author: 1, createdAt: -1 });
-CommentSchema.index({ deletedAt: 1 });
+CommentSchema.index({ post: 1, parentId: 1, createdAt: -1 }); // For nested comments
+
+// Partial index for non-deleted comments (most common query)
+CommentSchema.index({ post: 1, deletedAt: 1 }, { partialFilterExpression: { deletedAt: null } });
 
 export const CommentModel = model<Comment & Document>('Comment', CommentSchema);

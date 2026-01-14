@@ -1,5 +1,8 @@
 import { PostModel, Post, PostStatus } from '../models/post.model';
 import { Document, Types } from 'mongoose';
+import { isValidObjectId, toObjectId } from '../utils/sanitization.util';
+
+const MAX_LIMIT = 100;
 
 export class PostRepository {
     async create(data: Partial<Post>): Promise<Post & Document> {
@@ -7,23 +10,32 @@ export class PostRepository {
     }
 
     async findById(postId: string): Promise<(Post & Document) | null> {
-        return await PostModel.findOne({ _id: new Types.ObjectId(postId), deletedAt: null }).populate('author', 'name email');
+        if (!isValidObjectId(postId)) {
+            return null;
+        }
+        return await PostModel.findOne({
+            _id: toObjectId(postId),
+            $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }]
+        }).populate('author', 'name email');
     }
 
     async findByAuthor(
         authorId: string,
         options: { page?: number; limit?: number; status?: PostStatus; includeDeleted?: boolean }
-    ): Promise<(Post & Document)[]> {
+    ): Promise<any[]> {
+        if (!isValidObjectId(authorId)) {
+            return [];
+        }
         const page = options.page || 1;
-        const limit = options.limit || 10;
+        const limit = Math.min(options.limit || 10, MAX_LIMIT);
         const skip = (page - 1) * limit;
 
-        const query: any = { author: authorId };
+        const query: any = { author: toObjectId(authorId) };
         if (options.status) {
             query.status = options.status;
         }
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.$or = [{ deletedAt: null }, { deletedAt: { $exists: false } }];
         }
 
         return await PostModel
@@ -31,7 +43,9 @@ export class PostRepository {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('author', 'name email');
+            .select('title content author status tags slug createdAt updatedAt deletedAt')
+            .populate('author', 'name email')
+            .lean();
     }
 
     async findAll(options: {
@@ -40,9 +54,9 @@ export class PostRepository {
         status?: PostStatus;
         tags?: string[];
         includeDeleted?: boolean;
-    }): Promise<(Post & Document)[]> {
+    }): Promise<any[]> {
         const page = options.page || 1;
-        const limit = options.limit || 10;
+        const limit = Math.min(options.limit || 10, MAX_LIMIT);
         const skip = (page - 1) * limit;
 
         const query: any = {};
@@ -53,7 +67,7 @@ export class PostRepository {
             query.tags = { $in: options.tags };
         }
         if (!options.includeDeleted) {
-            query.deletedAt = null;
+            query.$or = [{ deletedAt: null }, { deletedAt: { $exists: false } }];
         }
 
         return await PostModel
@@ -61,32 +75,49 @@ export class PostRepository {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('author', 'name email');
+            .select('title content author status tags slug createdAt updatedAt deletedAt')
+            .populate('author', 'name email')
+            .lean();
     }
 
     async update(postId: string, data: Partial<Post>): Promise<(Post & Document) | null> {
+        if (!isValidObjectId(postId)) {
+            return null;
+        }
         return await PostModel.findOneAndUpdate(
-            { _id: new Types.ObjectId(postId), deletedAt: null },
+            {
+                _id: toObjectId(postId),
+                $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }]
+            },
             { $set: data },
             { new: true, runValidators: true }
         ).populate('author', 'name email');
     }
 
     async delete(postId: string): Promise<void> {
-        await PostModel.findByIdAndDelete(postId);
+        if (!isValidObjectId(postId)) {
+            throw new Error('Invalid post ID');
+        }
+        await PostModel.findByIdAndDelete(toObjectId(postId));
     }
 
     async softDelete(postId: string): Promise<(Post & Document) | null> {
+        if (!isValidObjectId(postId)) {
+            return null;
+        }
         return await PostModel.findByIdAndUpdate(
-            new Types.ObjectId(postId),
+            toObjectId(postId),
             { $set: { deletedAt: new Date() } },
             { new: true }
         ).populate('author', 'name email');
     }
 
     async restore(postId: string): Promise<(Post & Document) | null> {
+        if (!isValidObjectId(postId)) {
+            return null;
+        }
         return await PostModel.findByIdAndUpdate(
-            new Types.ObjectId(postId),
+            toObjectId(postId),
             { $set: { deletedAt: null } },
             { new: true }
         ).populate('author', 'name email');
@@ -95,9 +126,9 @@ export class PostRepository {
     async findDeleted(options: {
         page?: number;
         limit?: number;
-    }): Promise<(Post & Document)[]> {
+    }): Promise<any[]> {
         const page = options.page || 1;
-        const limit = options.limit || 10;
+        const limit = Math.min(options.limit || 10, MAX_LIMIT);
         const skip = (page - 1) * limit;
 
         return await PostModel
@@ -105,24 +136,35 @@ export class PostRepository {
             .sort({ deletedAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('author', 'name email');
+            .select('title status author deletedAt')
+            .populate('author', 'name email')
+            .lean();
     }
 
     async updateStatus(postId: string, status: PostStatus): Promise<(Post & Document) | null> {
+        if (!isValidObjectId(postId)) {
+            return null;
+        }
         return await PostModel.findOneAndUpdate(
-            { _id: new Types.ObjectId(postId), deletedAt: null },
+            {
+                _id: toObjectId(postId),
+                $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }]
+            },
             { $set: { status } },
             { new: true }
         ).populate('author', 'name email');
     }
 
     async countByAuthor(authorId: string, status?: PostStatus, includeDeleted?: boolean): Promise<number> {
-        const query: any = { author: authorId };
+        if (!isValidObjectId(authorId)) {
+            return 0;
+        }
+        const query: any = { author: toObjectId(authorId) };
         if (status) {
             query.status = status;
         }
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.$or = [{ deletedAt: null }, { deletedAt: { $exists: false } }];
         }
         return await PostModel.countDocuments(query);
     }
@@ -136,7 +178,7 @@ export class PostRepository {
             query.tags = { $in: tags };
         }
         if (!includeDeleted) {
-            query.deletedAt = null;
+            query.$or = [{ deletedAt: null }, { deletedAt: { $exists: false } }];
         }
         return await PostModel.countDocuments(query);
     }

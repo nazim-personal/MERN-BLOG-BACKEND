@@ -2,6 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { UserModel } from '../models/user.model';
+import { Role, RolePermissions } from '../config/roles';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -52,8 +53,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 googleId: profile.id,
                 email: email,
                 name: profile.displayName,
-                // Password is optional now, but we can set a random one or leave it undefined if schema allows
-                // Since we made it optional in schema, we can skip it.
+                permissions: RolePermissions[Role.USER] || []
             });
 
             await newUser.save();
@@ -93,6 +93,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
                 facebookId: profile.id,
                 email: email, // Note: Facebook might not always return email
                 name: profile.displayName || `${profile.name?.givenName} ${profile.name?.familyName}`,
+                permissions: RolePermissions[Role.USER] || []
             });
 
             await newUser.save();
