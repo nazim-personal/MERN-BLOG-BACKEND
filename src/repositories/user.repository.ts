@@ -1,6 +1,7 @@
 import { UserModel } from '../models/user.model';
 import { Types } from 'mongoose';
 import { isValidObjectId, toObjectId } from '../utils/sanitization.util';
+import { Role } from '../config/roles';
 
 const MAX_LIMIT = 100;
 
@@ -26,6 +27,17 @@ export class UserRepository {
         permissions?: string[];
     }) {
         return UserModel.create(data);
+    }
+
+    async update(userId: string, data: { name?: string; role?: Role; permissions?: string[] }) {
+        if (!isValidObjectId(userId)) {
+            throw new Error('Invalid user ID');
+        }
+        return UserModel.findByIdAndUpdate(
+            toObjectId(userId),
+            { $set: data },
+            { new: true, runValidators: true }
+        ).select('-password').lean();
     }
 
     async delete(userId: string): Promise<void> {

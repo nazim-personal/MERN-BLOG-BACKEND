@@ -258,4 +258,37 @@ export class AuthController {
         }
     };
 
+
+    public updateUser = async (req: Request, res: Response) => {
+        try {
+            const { userId } = req.params;
+            const updatedBy = req.user?.id;
+            const userRole = req.user?.role;
+
+            if (!updatedBy || !userRole) {
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    success: false
+                });
+            }
+
+            const result = await this.authService.updateUser({
+                userId,
+                data: req.body,
+                updatedBy,
+                userRole
+            });
+
+            return res.status(200).json({
+                ...result,
+                success: true
+            });
+        } catch (error: any) {
+            return res.status(400).json({
+                message: error.message,
+                success: false
+            });
+        }
+    };
+
 }

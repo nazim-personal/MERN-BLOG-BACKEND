@@ -111,6 +111,11 @@ export const createAuthRoutes = (
         authController.updateUserPermissions
     );
 
+    router.put('/users/:userId',
+        authMiddleware(accessSecret, sessionRepository, userRepository),
+        authController.updateUser
+    );
+
 
     router.get('/me',
         authMiddleware(accessSecret, sessionRepository, userRepository),

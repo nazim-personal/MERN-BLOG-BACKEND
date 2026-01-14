@@ -5,7 +5,7 @@ import { AuthConfig } from '../config/types';
 import { UserRepository } from '../repositories/user.repository';
 import { SessionService } from './session.service';
 import { logger } from '../utils/logger';
-import { Role, RolePermissions } from '../config/roles';
+import { Role, Permission, RolePermissions } from '../config/roles';
 
 export class AuthService {
     private config: AuthConfig;
@@ -290,6 +290,61 @@ export class AuthService {
                     ...(RolePermissions[(user.role as Role) || Role.USER] || []),
                     ...(user.permissions || [])
                 ]))
+            }
+        };
+    }
+
+    async updateUser(payload: {
+        userId: string;
+        data: { name?: string; role?: Role };
+        updatedBy: string;
+        userRole: string;
+    }) {
+        // Only the user themselves or an ADMIN can update
+        const isOwner = payload.userId === payload.updatedBy;
+        const isAdmin = payload.userRole === Role.ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new Error('You do not have permission to update this user');
+        }
+
+        const updateData: { name?: string; role?: Role; permissions?: string[] } = {};
+
+        if (payload.data.name) {
+            updateData.name = payload.data.name;
+        }
+
+        if (payload.data.role) {
+            if (!isAdmin) {
+                throw new Error('You do not have permission to update user roles');
+            }
+            if (!Object.values(Role).includes(payload.data.role)) {
+                throw new Error('Invalid role');
+            }
+            updateData.role = payload.data.role;
+            // Automatically update permissions based on the new role
+            updateData.permissions = RolePermissions[payload.data.role] || [];
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            throw new Error('No valid fields to update');
+        }
+
+        const user = await this.userRepository.update(payload.userId, updateData);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        logger.info(`User ${payload.userId} updated by ${payload.updatedBy}. Fields: ${Object.keys(updateData).join(', ')}`);
+
+        return {
+            message: 'User updated successfully',
+            data: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                updatedAt: (user as any).updatedAt
             }
         };
     }
