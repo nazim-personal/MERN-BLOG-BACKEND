@@ -46,8 +46,7 @@ export class AdminService {
             posts: {
                 total: totalPosts,
                 published: publishedPosts,
-                draft: draftPosts,
-                archived: totalPosts - publishedPosts - draftPosts
+                draft: draftPosts
             },
             comments: {
                 total: totalComments
