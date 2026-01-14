@@ -63,6 +63,40 @@ export class AuthController {
         }
     };
 
+    public handleSocialLogin = async (req: Request, res: Response) => {
+        try {
+            const user = req.user;
+            if (!user) {
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                return res.redirect(`${frontendUrl}/signin?error=Authentication failed`);
+            }
+
+            const device = {
+                ip: req.ip || 'unknown',
+                userAgent: req.headers['user-agent'] || 'unknown'
+            };
+
+            const result = await this.authService.loginWithSocialProvider(user, device);
+
+            // Redirect to frontend with tokens
+            // In a real app, you might use cookies or a temporary code exchange
+            // For this implementation, we'll redirect with query params (simple but not most secure)
+            // Or just return JSON if the client is expected to handle the callback via popup/iframe
+            // But typically OAuth callback is a full page redirect.
+            // Let's assume we redirect to a frontend URL with tokens.
+
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const { accessToken, refreshToken } = result.data;
+
+            res.redirect(
+            `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`
+            );
+        } catch (error: any) {
+             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+             res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message)}`);
+        }
+    };
+
     public logout = async (req: Request, res: Response) => {
         try {
             if (!req.sessionId) {
@@ -200,4 +234,29 @@ export class AuthController {
         }
     };
 
+    public getMe = async (req: Request, res: Response) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                return res.status(401).json({
+                    message: 'Unauthorized',
+                    success: false
+                });
+            }
+
+            const result = await this.authService.getUserProfile(userId);
+            res.json({
+                ...result,
+                success: true
+            });
+        } catch (error: any) {
+            res.status(400).json({
+                message: error.message,
+                success: false
+            });
+        }
+    };
+
 }
+
+// test

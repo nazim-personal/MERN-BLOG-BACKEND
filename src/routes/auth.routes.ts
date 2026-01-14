@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import passport from 'passport';
 import { AuthController } from '../controllers/auth.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { SessionRepository } from '../repositories/session.repository';
@@ -38,6 +39,43 @@ export const createAuthRoutes = (
         authController.refreshToken
     );
 
+    // Social Login Routes
+    router.get('/google',
+        passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
+
+    router.get('/google/callback',
+        (req, res, next) => {
+            passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
+                if (err || !user) {
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                    return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(info?.message || 'Authentication failed')}`);
+                }
+                req.user = user;
+                next();
+            })(req, res, next);
+        },
+        authController.handleSocialLogin
+    );
+
+    router.get('/facebook',
+        passport.authenticate('facebook', { scope: ['email'] })
+    );
+
+    router.get('/facebook/callback',
+        (req, res, next) => {
+            passport.authenticate('facebook', { session: false }, (err: any, user: any, info: any) => {
+                if (err || !user) {
+                    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                    return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(info?.message || 'Authentication failed')}`);
+                }
+                req.user = user;
+                next();
+            })(req, res, next);
+        },
+        authController.handleSocialLogin
+    );
+
     // Protected routes
     router.post('/logout',
         authMiddleware(accessSecret, sessionRepository, userRepository),
@@ -63,6 +101,12 @@ export const createAuthRoutes = (
         authMiddleware(accessSecret, sessionRepository, userRepository),
         permissionMiddleware(Permission.PERMISSIONS_MANAGE),
         authController.updateUserPermissions
+    );
+
+
+    router.get('/me',
+        authMiddleware(accessSecret, sessionRepository, userRepository),
+        authController.getMe
     );
 
     return router;

@@ -82,9 +82,17 @@ export class AuthService {
             throw new Error('Invalid credentials');
         }
 
+        return this.generateTokens(user, payload.device);
+    }
+
+    async loginWithSocialProvider(user: any, device: { ip: string; userAgent: string }) {
+        return this.generateTokens(user, device);
+    }
+
+    private async generateTokens(user: any, device: { ip: string; userAgent: string }) {
         const { session, refreshToken } = await this.sessionService.createSession(
             user.id as Types.ObjectId,
-            payload.device
+            device
         );
 
         const accessToken = jwt.sign(
@@ -258,6 +266,27 @@ export class AuthService {
                 customPermissions: user.permissions || [],
                 createdAt: (user as any).createdAt
             }))
+        };
+    }
+
+    async getUserProfile(userId: string) {
+        const user = await this.userRepository.findById(userId as any);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        return {
+            message: 'User profile retrieved successfully',
+            data: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role || Role.USER,
+                permissions: Array.from(new Set([
+                    ...(RolePermissions[(user.role as Role) || Role.USER] || []),
+                    ...(user.permissions || [])
+                ]))
+            }
         };
     }
 }

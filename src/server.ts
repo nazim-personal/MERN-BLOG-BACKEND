@@ -8,6 +8,9 @@ import { logger } from './utils/logger';
 import { errorHandler } from './errors/error-handler';
 import { NotFoundError } from './errors/custom-errors';
 
+import passport from 'passport';
+import './config/passport';
+
 dotenv.config();
 
 const app = express();
@@ -22,6 +25,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(passport.initialize());
 
 const authConfig = {
     mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-db',

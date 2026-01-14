@@ -13,7 +13,7 @@ http://localhost:3018/api
 5. [Admin Dashboard](#admin-dashboard)
 6. [Rate Limiting](#rate-limiting)
 7. [Error Responses](#error-responses)
-
+8. [Social Login](#social-login)
 ---
 
 ## Authentication
@@ -109,6 +109,35 @@ curl -X POST http://localhost:3018/api/v1/auth/login \
 
 ---
 
+### Get Current User
+Retrieve the profile of the currently authenticated user.
+
+**Endpoint:** `GET /v1/auth/me`
+**Authentication:** Required (Bearer token)
+
+**Success Response (200):**
+```json
+{
+  "message": "User profile retrieved successfully",
+  "data": {
+    "id": "507f1f77bcf86cd799439011",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "role": "user",
+    "permissions": ["posts:create", "posts:edit:own", "posts:delete:own", "posts:view", "comments:create", "comments:edit:own", "comments:delete:own"]
+  },
+  "success": true
+}
+```
+
+**cURL Example:**
+```bash
+curl -X GET http://localhost:3018/api/v1/auth/me \
+  -H "Authorization: Bearer <access_token>"
+```
+
+---
+
 ### Refresh Token
 Get a new access token using a refresh token.
 
@@ -149,6 +178,51 @@ curl -X POST http://localhost:3018/api/v1/auth/refresh-token \
     "refreshToken": "a1b2c3d4e5f6..."
   }'
 ```
+
+---
+
+### Social Login
+Authenticate using social providers (Google, Facebook).
+
+#### Google Login
+Initiate Google OAuth flow.
+
+**Endpoint:** `GET /v1/auth/google`
+**Authentication:** Not required
+
+**Redirects:**
+- Redirects to Google's consent screen.
+- On success, redirects to `GET /v1/auth/google/callback`.
+
+#### Google Callback
+Handle Google OAuth callback.
+
+**Endpoint:** `GET /v1/auth/google/callback`
+**Authentication:** Not required (Handled by Passport)
+
+**Success Response:**
+- Redirects to the frontend application with tokens in query parameters.
+- Example: `http://localhost:5173/dashboard?token=...&refreshToken=...`
+
+#### Facebook Login
+Initiate Facebook OAuth flow.
+
+**Endpoint:** `GET /v1/auth/facebook`
+**Authentication:** Not required
+
+**Redirects:**
+- Redirects to Facebook's consent screen.
+- On success, redirects to `GET /v1/auth/facebook/callback`.
+
+#### Facebook Callback
+Handle Facebook OAuth callback.
+
+**Endpoint:** `GET /v1/auth/facebook/callback`
+**Authentication:** Not required (Handled by Passport)
+
+**Success Response:**
+- Redirects to the frontend application with tokens in query parameters.
+- Example: `http://localhost:5173/dashboard?accessToken=...&refreshToken=...`
 
 ---
 

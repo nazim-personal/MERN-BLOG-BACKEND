@@ -4,6 +4,8 @@ import { Role } from '../config/roles';
 export interface User {
     email: string;
     password?: string;
+    googleId?: string;
+    facebookId?: string;
     name: string;
     metadata?: Record<string, any>;
     role?: Role;
@@ -13,7 +15,9 @@ export interface User {
 
 const UserSchema = new Schema({
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
+    googleId: { type: String },
+    facebookId: { type: String },
     name: { type: String, required: true },
     metadata: { type: Schema.Types.Mixed, default: {} },
     role: { type: String, enum: Object.values(Role), default: Role.USER },
